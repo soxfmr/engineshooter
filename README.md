@@ -24,8 +24,11 @@ MONGODB_COLL = ''
 ## Proxy
 Under the settings.py, define the HTTP_PROXY constant:
 ```
-HTTP_PROXY = https://127.0.0.1:1080
+HTTP_PROXY = 'https://127.0.0.1:1080'
 ```
+
+## About CAPTCHA
+The spider will popup the captcha image when the captcha present, you should type the captcha on the console manually for further crawling. :-)
 
 ## License
 Publish under MIT
