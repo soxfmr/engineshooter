@@ -23,19 +23,13 @@ class MongodbPipeline(object):
         return cls(crawler.settings)
 
     def open_spider(self, spider):
-        '''
         self.client = pymongo.MongoClient(self.host, self.port)
         db = self.client[self.mongo_db]
         self.collection = db[self.mongo_coll]
-        '''
 
     def close_spider(self, spider):
-        '''
         self.client.close()
-        '''
 
     def process_item(self, item, spider):
-        '''
         self.collection.insert(dict(item))
         spider.logger.info('Item add to MongoDB')
-        '''
