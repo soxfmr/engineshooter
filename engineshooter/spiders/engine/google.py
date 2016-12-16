@@ -82,11 +82,18 @@ class GoogleEngine:
 
         # Extact all of result
         for item in response.css('h3.r'):
-            result = SearchResultItem()
-            result['url'] = item.css('a::attr(href)').extract_first()
-            result['title'] = item.css('a::text').extract_first().encode('utf-8')
+            try:
+                result = SearchResultItem()
+                result['url'] = re.search('http[s]*://.+', item.css('a::attr(href)').extract_first()).group()
+                # Right to Left
+                title = item.css('a::text').extract_first() or item.css('a span::text')
+                if not title:
+                    title = ''
 
-            self.result.append(result)
+                result['title'] = title.encode('utf-8')
+                self.result.append(result)
+            except Exception as e:
+                self.spider.logger.error('An error occured when extract the item: ' + str(e))
 
         # Current page
         current_page = response.css('td.cur::text').extract_first()
