@@ -1,3 +1,4 @@
+import json
 import scrapy
 from engine import GoogleEngine
 try:
@@ -10,27 +11,26 @@ class EngineShooterSpider(scrapy.Spider):
     name = 'engineshooter'
     handle_httpstatus_list = [301, 302, 503]
 
-    def start_requests(self):
-        maxpage = getattr(self, 'max', 0)
-        engine = getattr(self, 'engine', 'g')
-        keyword = getattr(self, 'keyword', None)
+    def __init__(self, keyword, engine='g', maxpage=0, *args, **kwargs):
+        self.engine = None
+        self.keyword = keyword
+        self.maxpage = maxpage
+        super(EngineShooterSpider, self).__init__(*args, **kwargs)
 
         if not keyword:
             raise ValueError('argument keyword should be provides')
 
-        if engine == 'g':
-            e = GoogleEngine(self)
+        # if engine == 'g':
+        #     self.engine = GoogleEngine(self)
+        # Only Google engine implements
+        self.engine = GoogleEngine(self)
 
-        yield e.search(keyword, self.parse, maxpage)
-
-    def grab_captcha(self, response):
-        engine = response.meta['engine']
-        engine.grab_captcha(response)
+    def start_requests(self):
+        yield self.engine.search(self.keyword, self.parse, self.maxpage)
 
     def parse(self, response):
-        engine = response.meta['engine']
-        if not engine.parse(response):
-            if engine.intercept():
+        if self.engine.parse(response):
+            if self.engine.intercept():
                 try: winsound.Beep(2500, 1000)
                 except:pass
         else:
@@ -41,8 +41,8 @@ class EngineShooterSpider(scrapy.Spider):
             # results = engine.get_result()
 
             # Retrieve all information
-            results = engine.get_result()
+            results = self.engine.get_result()
             for item in results:
                 yield item
 
-        yield engine.next()
+        yield self.engine.next()

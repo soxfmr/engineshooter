@@ -10,7 +10,6 @@ from os.path import join
 from urllib import urlencode
 from StringIO import StringIO
 from engineshooter.items import SearchResultItem
-from scrapy.utils.response import open_in_browser as view
 
 
 class GoogleEngine:
@@ -38,8 +37,7 @@ class GoogleEngine:
         self.keyword = keyword
         self.callback = callback
 
-        return scrapy.Request(url=GoogleEngine.BASE_URL.format(self.keyword), callback=self.callback,
-            meta={'engine' : self})
+        return scrapy.Request(url=GoogleEngine.BASE_URL.format(self.keyword), callback=self.callback)
 
     def parse(self, response):
         # reset
@@ -64,10 +62,11 @@ class GoogleEngine:
                 self.spider.logger.info(response.headers['Location'])
                 self.spider.logger.warning('Captcha redirect detect, grabing the captcha...')
                 self.request = scrapy.Request(url = response.headers['Location'], callback = self.callback,
-                    dont_filter = True, meta = {'engine' : self, 'route' : self.grab_captcha})
+                    dont_filter = True, meta = {'route' : self.grab_captcha})
             else:
-                # Validate success
-                self.spider.logger.info('Validate success, continue for next request')
+                if 'route' not in response.meta:
+                    # Validate success
+                    self.spider.logger.info('Validate success, continue for next request')
                 self.url_next_page = response.headers['Location']
             return False
 
@@ -120,15 +119,14 @@ class GoogleEngine:
             return None
 
         self.spider.logger.info('Sending request for next page')
-        return scrapy.Request(url = self.url_next_page, callback = self.callback, dont_filter = True,
-            meta = {'engine' : self})
+        return scrapy.Request(url = self.url_next_page, callback = self.callback, dont_filter = True)
 
     def grab_captcha(self, response):
         self.payload = {'q' : response.css('input[name=q]::attr(value)').extract_first().encode('utf-8'),
             'continue' : response.css('input[name=continue]::attr(value)').extract_first().encode('utf-8') }
 
         imgurl = response.urljoin(response.css('img::attr(src)').extract_first())
-        self.request = scrapy.Request(url=imgurl, callback=self.callback, meta = {'engine' : self,
+        self.request = scrapy.Request(url=imgurl, callback=self.callback, meta = {
             'route' : self.require_captcha, 'url' : response.url})
         # Notify user for captcha
         self.intercept_status = True
@@ -150,7 +148,7 @@ class GoogleEngine:
 
             self.spider.logger.info(url)
 
-            self.request = scrapy.Request(url=url, dont_filter = True, meta = {'engine' : self, 'route' : self.grab_captcha})
+            self.request = scrapy.Request(url=url, dont_filter = True, meta = {'route' : self.grab_captcha})
             self.spider.logger.info(self.payload)
             break
 
