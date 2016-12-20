@@ -109,6 +109,8 @@ class GoogleEngine:
         self.spider.logger.info('Totally %d urls been extracted from current page', len( self.result ))
         self.spider.logger.info('Response parsing completed')
 
+        return True
+
     def next(self):
         if self.request:
             self.spider.logger.info('Urgent request provides, sending request directly.')

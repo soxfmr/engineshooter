@@ -29,7 +29,7 @@ class EngineShooterSpider(scrapy.Spider):
         yield self.engine.search(self.keyword, self.parse, self.maxpage)
 
     def parse(self, response):
-        if self.engine.parse(response):
+        if not self.engine.parse(response):
             if self.engine.intercept():
                 try: winsound.Beep(2500, 1000)
                 except:pass
