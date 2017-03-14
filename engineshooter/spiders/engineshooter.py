@@ -1,5 +1,6 @@
 import json
 import scrapy
+from engine import BaiduEngine
 from engine import GoogleEngine
 try:
     import winsound
@@ -14,16 +15,22 @@ class EngineShooterSpider(scrapy.Spider):
     def __init__(self, keyword, engine='g', maxpage=0, *args, **kwargs):
         self.engine = None
         self.keyword = keyword
-        self.maxpage = maxpage
+        self.maxpage = int(maxpage)
+        self.engine_name = engine
         super(EngineShooterSpider, self).__init__(*args, **kwargs)
 
         if not keyword:
             raise ValueError('argument keyword should be provides')
 
-        # if engine == 'g':
-        #     self.engine = GoogleEngine(self)
+        if engine == 'g':
+            self.engine = GoogleEngine(self)
+        elif engine == 'b':
+            self.engine = BaiduEngine(self)
         # Only Google engine implements
-        self.engine = GoogleEngine(self)
+        # self.engine = GoogleEngine(self)
+
+        if not engine:
+            raise ValueError('Invalid engine implements: %s' % engine)
 
     def start_requests(self):
         yield self.engine.search(self.keyword, self.parse, self.maxpage)
