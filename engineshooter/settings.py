@@ -69,6 +69,7 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
+    'engineshooter.pipelines.BaiduPipeline': 200,
     'engineshooter.pipelines.MongodbPipeline': 300,
 }
 
